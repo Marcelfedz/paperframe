@@ -9,7 +9,7 @@ Companion docs:
 - `docs/style-folio.md` is the visual language: devices, palette, motion and the kit's gotchas.
 - `docs/producer.md` is the brief for the agent that writes the script (steps 2–5).
 - `docs/scene-author.md` is the brief for the agents that write scenes (step 6).
-- `examples/react/` is a complete reference video: ReAct (Yao et al., ICLR 2023, CC BY 4.0). Its `briefing.md`, `narration.md`, `prompts/` and `scenes/` set the bar. When in doubt, match its rigour, tone and shape.
+- `examples/` holds three complete reference videos, all CC BY 4.0: ReAct (Yao et al., ICLR 2023), LLaMA (Touvron et al., 2023) and Chain-of-Thought Prompting (Wei et al., NeurIPS 2022). Their `briefing.md`, `narration.md`, `prompts/` and `scenes/` set the bar. ReAct is the one the briefs quote most. LLaMA and Chain-of-Thought show the current full-mode shape (paired prompt files and an author-pair table) and keep the `PAGES` switch in every scene, with `standIn` redraws. When in doubt, match their rigour, tone and shape.
 
 Everything runs from the repo root through `bin/paperframe`. Wherever a command takes `<video>`, it means a slug (`react` → `papers/react/`) or a path (`examples/react`).
 
@@ -41,7 +41,7 @@ Lite keeps every rigour rule. It is shorter, not looser.
 papers/<slug>/
 ├── briefing.md      paper header, rights, verified facts, guardrails, segment table
 ├── narration.md     the script: one `## seg` heading per segment
-├── prompts/         one brief per segment: NN-seg.md (or NN-a_MM-b.md for a pair)
+├── prompts/         segment briefs: NN-a_MM-b.md per author pair (full), NN-seg.md (lite)
 ├── scenes/          NN-seg.js per segment, plus _data.js for shared data
 ├── paper/           source.pdf, page-NN.png, words.json, text-NN.txt     build output
 ├── audio/           NN-seg.wav, timings.json                             build output
@@ -77,7 +77,7 @@ bin/paperframe new <slug> <pdf-url> [--pages 1-N]
 
 `<pdf-url>` can be an arXiv abstract or PDF link, any PDF URL, or a local file. `--pages` defaults to every page. For a long paper, limit it to the main text plus the appendix pages with figures or tables you might show. Running `new` again on an existing slug re-prepares the paper and reuses the downloaded `source.pdf`.
 
-This creates `papers/<slug>/` with the layout above and runs `engine/paper_prep.py`. That script writes `paper/source.pdf`, `page-NN.png` (200 dpi; 1700 × 2200 px for US letter, check A4 papers), `words.json` (every word with its box in page px, which drives highlights) and `text-NN.txt` (plain text per page, which the briefing is written against). Annotations such as link boxes are hidden in the page images. The PDF is treated as data: only poppler reads it.
+This creates `papers/<slug>/` with the layout above and runs `engine/paper_prep.py`. That script writes `paper/source.pdf`, `page-NN.png` (200 dpi: 1700 × 2200 px for US letter, 1654 × 2339 for A4, 1654 × 2197 for a Nature page), `words.json` (every word with its box in page px, which drives highlights) and `text-NN.txt` (plain text per page, which the briefing is written against). Annotations such as link boxes are hidden in the page images. The PDF is treated as data: only poppler reads it.
 
 ## Rights
 
@@ -97,6 +97,8 @@ Whether the real pages may appear in a public video depends on the paper's licen
 
 **Third-party material inside an open paper is not covered by the paper's licence.** A figure marked "reprinted with permission" from another publication stays out: never put its page on the desk whole, and never lift it. Example: Figure 2 of *Why Language Models Hallucinate* (arXiv:2509.04664, CC BY 4.0) is reprinted from the GPT-4 report, so that video crops the text below the figure and never shows the figure. Photographs in a figure (dataset images, for instance), company logos used as row markers, and quoted text from other sources (Wikipedia is CC BY-SA) need the same thought. Show short excerpts only as part of the paper's page, with the citation on screen, and never rebuild logos in your own diagrams.
 
+**Outside sources.** Later papers, blog posts and project pages that the video mentions (usually in the last segment) are not covered by the paper's licence. They appear as typed cards with their citation (title or author, date, URL), never as their pages, screenshots or logos. A short quote of a few words from a source that isn't CC-licensed is acceptable on such a card, with the citation beside it. When a source's only date is in its URL, the facts table says so.
+
 **What the decision switches.** Every scene keeps all page bitmaps behind one constant at its top:
 
 ```js
@@ -104,7 +106,7 @@ Whether the real pages may appear in a public video depends on the paper's licen
 const PAGES = true;
 ```
 
-With `PAGES = false`, each page is replaced by `standIn(page)` from `engine/folio.js`: a white sheet with grey bars where the words are, at the same geometry. Highlights, boxes, lift-offs and the source stamp therefore still land in the right places. Figures you need are redrawn, either in place on the stand-in (`standIn(page, { blank, draw })`) or on your own sheets (`blankPage`), labelled as redrawn, with the citation on screen. A video built this way becomes publishable by flipping one flag plus some redraws, or never needs the pages at all. Write scenes with the switch from the start, even for CC BY papers: it costs one line.
+With `PAGES = false`, each page is replaced by `standIn(page)` from `engine/folio.js`: a white sheet with grey bars where the words are, at the same geometry. Highlights, boxes, lift-offs and the source stamp therefore still land in the right places. Figures you need are redrawn, either in place on the stand-in (`standIn(page, { blank, draw })`) or on your own sheets (`blankPage`), labelled as redrawn, with the citation on screen. A video built this way becomes publishable by flipping one flag plus some redraws, or never needs the pages at all. Write scenes with the switch from the start, even for CC BY papers: it costs one line. `examples/llama/` and `examples/chain-of-thought/` do this in every scene, with `standIn` redraws for some of the figures and tables: Table 1 in `llama/scenes/03-data.js` (`blank` plus `draw`), Table 20 in `chain-of-thought/scenes/04-tasks.js`.
 
 **Credit, always.** The source stamp (`cite()`) is on screen whenever paper content is, and the end card carries the full citation. The description carries the credit line, for example:
 
@@ -120,7 +122,8 @@ The briefing is written from the paper itself (`paper/text-NN.txt` and the page 
 - **Source files**: which pages were prepared and which are used, plus any figure-text quirks (see `docs/style-folio.md`, gotchas).
 - **Verified facts table**: every claim the video makes, mapped to a page, section, table, figure or equation of the paper. Anything from outside the paper gets a URL.
 - **Guardrails**: what must not be said or must be said carefully. Inconsistencies inside the paper (use the table, note the other), claims the authors only "suspect", best-vs-best comparisons, what is illustrative, names spelled the way the page spells them.
-- **Segment table**: segment, target duration, pages on the desk, visual centrepiece.
+- **Colour key**: what each colour means in this video. It lives in the briefing or `_data.js`, never only in one prompt.
+- **Segment table**: segment, target duration, pages on the desk, visual centrepiece. In full mode, followed by the author pairs: which two segments each prompt file holds, and what they share.
 
 ## 3. Narration (producer)
 
@@ -143,11 +146,11 @@ This is page one of a paper that went up on {arXiv|archive} on October sixth, tw
 
 - One `## seg` heading per segment. The lines before the first `##` are the header; `audio.py` reads optional settings from it (see step 4).
 - Numbers spelled out ("sixty point nine"). Acronyms the voice should spell get hyphens in the spoken half.
-- Pronunciation overrides: `{Display|spoken}`, for example `{arXiv|archive}`, `{ICLR|I-C-L-R}`, `{ReAct|ree-act}`. The display half is what scenes match cue words against.
-- A paragraph that is only `(pause N)` inserts N seconds of silence. Use it after the cover and after big 3D reveals.
-- Short sentences. Each sentence becomes an exact timing anchor, and a beat needs a word to land on.
+- Pronunciation overrides: `{Display|spoken}`, for example `{arXiv|archive}`, `{ICLR|I-C-L-R}`, `{ReAct|ree-act}`. The display half is what scenes match cue words against. Punctuation right after an override becomes a word of its own in `timings.json` (`{PaLM|palm},` gives `PaLM` and `,`) and shifts every word index after it. Write the punctuation inside both halves (`{PaLM,|palm,}`), or count it in the prompts.
+- A paragraph that is only `(pause N)` inserts N seconds of silence. Use it after the cover, after big 3D reveals, and at the end of the last segment: `(pause 2)` keeps the end card's licence line up long enough to read.
+- Short sentences. Each sentence becomes an exact timing anchor, and a beat needs a word to land on. A new sentence starts only where `.`, `!`, `?` or `…` is followed by a capital letter, a quote or `{`. A sentence that opens with a lowercase word ("arXiv") or a digit stays joined to the one before, and loses its anchor.
 - About 155 words per minute after the default tempo. Budget the segment table with it.
-- The cover follows the reference: the page and its date, who wrote it, one line from the abstract or introduction read verbatim (the highlighter runs over it on the page), why it mattered, and the promise of what the viewer will be able to do by the end.
+- The cover follows the reference: the page and its date, who wrote it, one line from the abstract or introduction read verbatim (the highlighter runs over it on the page), why it mattered, and the promise of what the viewer will be able to do by the end. "Why it mattered" needs a source. Without one, the cover says what the paper did and nothing about how it was received.
 - Quote the paper verbatim only where the line exists on a page that is on screen. Everything else is paraphrase.
 - No hype: no "groundbreaking", "revolutionary", "game-changing", "unlock", "leverage", "seamless", "delve". The video explains; it does not sell.
 
@@ -161,17 +164,17 @@ This runs `engine/audio.py` and writes `audio/NN-seg.wav` and `audio/timings.jso
 
 The voice is Kokoro by default: local, free, voice `am_michael`. A `voice: bf_emma` line in the narration header picks another Kokoro voice. ElevenLabs is optional and paid. Set `ELEVENLABS_API_KEY` in the environment (or in a `.env` file at the repo root, which is gitignored), then choose it with a `tts: elevenlabs` header line or `PAPERFRAME_TTS=elevenlabs`. A `voice: <id>` header line pins the ElevenLabs voice. It gives real word alignment instead of interpolation, and caches responses in `audio/.cache` so re-runs cost nothing.
 
-Scenes are animated against these timings, never the reverse. After any narration edit, re-run audio for that segment and re-check every scene that depends on it. Check the printed durations against the segment table, and trim the script if the total runs more than 30 s over target.
+Scenes are animated against these timings, never the reverse. After any narration edit, re-run audio for that segment and re-check every scene that depends on it. Check the printed durations against the segment table, and trim the script if the total runs more than 30 s over target. The total is printed as m:ss and includes the 0.6 s tail each segment holds after its last word; the per-segment durations, here and in `timings.json`, don't. Budget against the total: it is the length of the finished video.
 
 ## 5. Segment prompts (producer)
 
-One brief per segment in `prompts/NN-seg.md`. Two short segments can share a file (`04-tools_05-household.md`). The shape is in `docs/producer.md`. In short: the pages on the desk, the narration with sentence start times, the exact phrases to highlight (verbatim strings that exist on that page), figure and table boxes in page px, 5–10 beats each keyed to a narration word, and the guardrails for that segment.
+In full mode, one brief per scene author, holding its two segments: `prompts/01-cover_02-problem.md`, as listed in the briefing's author pairs. In lite mode, one brief per segment, `prompts/NN-seg.md`. The shape is in `docs/producer.md`. In short: the pages on the desk, the narration with sentence start times, the exact phrases to highlight (verbatim strings that exist on that page), figure and table boxes in page px, 5–10 beats each keyed to a narration word, and the guardrails for that segment.
 
 Data that several segments share goes in `scenes/_data.js`: palette sampled from the paper's figures, figure boxes, illustrative values. It holds pure data only, consistent across segments, and is checked for internal consistency.
 
 ## 6. Scenes (scene authors)
 
-Each segment is one file, `scenes/NN-seg.js`, written against `docs/style-folio.md` and the kit in `engine/folio.js`. The reference scenes are in `examples/react/scenes/`. `01-cover.js` shows the full device set: the page arriving, the highlight with the voice, a lift-off, slabs standing up and the source stamp.
+Each segment is one file, `scenes/NN-seg.js`, written against `docs/style-folio.md` and the kit in `engine/folio.js`. The reference scenes are in `examples/react/scenes/`, `examples/llama/scenes/` and `examples/chain-of-thought/scenes/`. ReAct's `01-cover.js` shows the full device set: the page arriving, the highlight with the voice, a lift-off, slabs standing up and the source stamp.
 
 ### Scene contract
 
@@ -220,7 +223,7 @@ bin/paperframe stills <video> <seg> --at 3.2,7.5,18.4  # exact times, up to 12 p
 bin/paperframe preview <video> <seg>                   # live preview with audio and a scrubber
 ```
 
-Stills go to `review/<seg>/`, with a `contact.png` sheet. Open and look at every contact sheet. Then take `--at` stills at the cue words that matter and at every highlight. A contact sheet is small: check text legibility and harmful-content legibility on the full-size stills, not on the sheet.
+Stills go to `review/<seg>/`, with a `contact.png` sheet. Each call replaces that folder, so an `--at` pass wipes the contact sheet of the pass before; copy it elsewhere first if you need it. Open and look at every contact sheet. Then take `--at` stills at the cue words that matter and at every highlight. A contact sheet is small: check text legibility and harmful-content legibility on the full-size stills, not on the sheet.
 
 Checklist, for every segment:
 

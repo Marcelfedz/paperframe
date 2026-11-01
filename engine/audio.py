@@ -342,7 +342,8 @@ def main():
     tpath.write_text(json.dumps({"fps": 30, "tail": TAIL, "tts": ENGINE, "voice": EL_VOICE if ENGINE == "elevenlabs" else KOKORO_VOICE, "atempo": AT, "segments": result}, indent=1))
     total = sum(s["duration"] + TAIL for s in result)
     shown = tpath.relative_to(ROOT) if tpath.is_relative_to(ROOT) else tpath
-    print(f"  total {total:.1f}s ({total/60:.2f} min) -> {shown}")
+    m, s = divmod(round(total), 60)
+    print(f"  total {total:.1f}s ({m}:{s:02d}, with {TAIL} s tail per segment) -> {shown}")
 
 
 if __name__ == "__main__":

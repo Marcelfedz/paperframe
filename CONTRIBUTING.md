@@ -10,12 +10,14 @@ A contributed video is a folder in `examples/<slug>/` with the four source parts
 
 ```
 examples/<slug>/
-├── README.md       the paper, its licence, and the commands to rebuild the video (copy examples/react/README.md)
+├── README.md       the paper, its licence, and the commands to rebuild the video (model it on examples/react/README.md)
 ├── briefing.md     paper header, rights, verified facts, guardrails, segment table
 ├── narration.md
 ├── prompts/
 └── scenes/         NN-seg.js per segment, plus _data.js
 ```
+
+Three existing examples show what a finished folder looks like: `examples/react/`, `examples/llama/` and `examples/chain-of-thought/`. The last two also show the full-mode shape (paired prompt files, an author-pair table in the briefing) and the `PAGES` switch with `standIn` redraws.
 
 **Never commit** the PDF, page images, `words.json`, audio, review stills or renders. `paper/`, `audio/`, `review/`, `render/` and `out/` are gitignored in `examples/*/`, so `git status` should show only the files above. Anyone can rebuild them from the commands in your folder's README.
 
@@ -26,7 +28,7 @@ How to get there:
 3. Check the imports: the kit root-absolute (`/engine/folio.js`), the video's own data relative (`./_data.js`). If a scene imports `/papers/<slug>/…`, change it.
 4. Rebuild from the copy to prove it works: prepare the paper into `examples/<slug>/` (the README's commands), run `bin/paperframe audio examples/<slug>`, then take stills of every segment.
 
-**Which papers.** Only papers whose licence allows showing the pages publicly, which in practice means CC BY or CC0. Name the licence and where you checked it in the briefing. For any other paper, the video can still be contributed with `PAGES = false` in every scene (stand-in pages and redrawn figures), but it has to look complete that way. Third-party figures inside an open paper ("reprinted with permission") never appear. See the Rights section of `docs/playbook.md`.
+**Which papers.** Only papers whose licence allows showing the pages publicly, which in practice means CC BY or CC0. Name the licence and where you checked it in the briefing. For any other paper, the video can still be contributed with `PAGES = false` in every scene (stand-in pages and redrawn figures), but it has to look complete that way. The LLaMA and Chain-of-Thought scenes show how the redraws are wired (`standIn(page, { blank, draw })`). Third-party figures inside an open paper ("reprinted with permission") never appear. See the Rights section of `docs/playbook.md`.
 
 **In the pull request description**, include:
 
@@ -49,7 +51,7 @@ How to get there:
 
 The kit is `engine/` (the scene kit `folio.js`, the renderer, the audio and paper-prep scripts) and `bin/paperframe`.
 
-- **Keep it backward compatible.** Existing scenes must render unchanged. Before and after your change, take the same stills of `examples/react` and compare them: `bin/paperframe stills examples/react cover --at 5,20,30`.
+- **Keep it backward compatible.** Existing scenes must render unchanged. Before and after your change, take the same stills of the three examples and compare them: `bin/paperframe stills examples/react cover --at 5,20,30`, and the same for `examples/llama` (A4 pages) and `examples/chain-of-thought`. Each call replaces `review/<seg>/`, so copy the before stills somewhere else first.
 - **Keep scenes pure.** Anything a scene calls must be a pure function of time and its inputs, with seeded randomness, because frames render out of order in parallel.
 - **Keep dependencies small.** The engine depends on Playwright and MathJax on the Node side, and on kokoro-onnx, numpy and soundfile on the Python side. A new dependency needs a strong reason.
 - **Document what you add.** Every new export gets a doc comment with its signature, and a line in the kit reference in `docs/style-folio.md`.

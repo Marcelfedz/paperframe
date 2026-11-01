@@ -35,7 +35,8 @@ Usage:
                                                     a path instead of a slug prepares that folder (examples/react)
   paperframe audio <video> [seg …]                  narration.md → audio/*.wav + audio/timings.json (Kokoro by default)
   paperframe stills <video> <seg> [--stills N | --at t1,t2]
-                                                    review stills → <video>/review/<seg>/contact.png (default --stills 8)
+                                                    review stills → <video>/review/<seg>/contact.png (default --stills 8);
+                                                    each call replaces review/<seg>/, so copy stills you want to keep
   paperframe preview <video> <seg>                  live preview with audio and a scrubber, in your browser
   paperframe render <video> [seg|all] [--workers N] render segments → <video>/render/NN-seg.mp4 (default all)
   paperframe assemble <video>                       join the segments → <video>/out/<slug>.mp4

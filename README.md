@@ -105,11 +105,11 @@ Everything runs from the repo root. `<video>` is a slug (`papers/<slug>/`) or a 
 | `bin/paperframe render <video> [seg\|all] [--workers N]` | Renders segments to `render/` |
 | `bin/paperframe assemble <video>` | Joins the segments into `out/<slug>.mp4` and prints chapter marks |
 
-In Claude Code, `/paper-to-video <url> [--lite]` runs all of it. The reference video in [`examples/react/`](examples/react/) shows what every file looks like.
+In Claude Code, `/paper-to-video <url> [--lite]` runs all of it. Three reference videos in [`examples/`](examples/) show what every file looks like: [ReAct](examples/react/), [LLaMA](examples/llama/) and [Chain-of-Thought Prompting](examples/chain-of-thought/), all CC BY 4.0. Each folder's README has the commands to rebuild it.
 
 ## Rights
 
-The real pages appear in a public video only when the paper's licence allows it. CC BY and CC0 allow it with credit. Most arXiv papers carry arXiv's default licence, which does not. For those, each scene has a one-line switch (`PAGES = false`) that replaces the pages with stand-ins of the same layout and uses redrawn figures. Figures that a paper reprints from someone else are never shown. The source stamp and the end card credit the paper in every video. Details are in the [Rights section of the playbook](docs/playbook.md#rights). It is practical guidance, not legal advice.
+The real pages appear in a public video only when the paper's licence allows it. CC BY and CC0 allow it with credit. Most arXiv papers carry arXiv's default licence, which does not. For those, each scene has a one-line switch (`PAGES = false`) that replaces the pages with stand-ins of the same layout and uses redrawn figures. The LLaMA and Chain-of-Thought examples have the switch in every scene, with `standIn` redraws. Figures that a paper reprints from someone else are never shown. The source stamp and the end card credit the paper in every video. Details are in the [Rights section of the playbook](docs/playbook.md#rights). It is practical guidance, not legal advice.
 
 This repository never contains paper PDFs, page images, audio or rendered video, apart from the credited README visuals above.
 
