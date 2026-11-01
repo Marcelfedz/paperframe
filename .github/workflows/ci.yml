@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Syntax
+        run: |
+          sh -n install.sh
+          bash -n bin/paperframe
+          for f in engine/*.js engine/*.mjs examples/*/scenes/*.js tests/*/scenes/*.js; do node --check "$f"; done
+          python -m py_compile engine/audio.py engine/paper_prep.py
+
+      - name: Engine dependencies
+        working-directory: engine
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Smoke render (TeX, desk, sheet, 3D, word cues in a real browser)
+        run: |
+          bin/paperframe stills tests/smoke smoke --stills 3
+          test -s tests/smoke/review/smoke/contact.png
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: smoke-stills
+          path: tests/smoke/review/
+          if-no-files-found: ignore

@@ -19,3 +19,8 @@ examples/*/audio/
 examples/*/review/
 examples/*/render/
 examples/*/out/
+
+# CI smoke test build output
+tests/*/review/
+tests/*/render/
+tests/*/out/
