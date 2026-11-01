@@ -1,6 +1,35 @@
-# Paperframe
+<div align="center">
 
-Turn a research paper into a narrated, animated video: the real pages on a desk, a highlighter that follows the voice, figures standing up in 3D.
+<img src="assets/readme/logo.png" width="220" alt="Paperframe" />
+
+<h1>Paperframe</h1>
+
+<p><em>Research papers, unfolded into short videos.</em></p>
+
+<p>
+<a href="https://github.com/Marcelfedz/paperframe/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/Marcelfedz/paperframe/ci.yml?branch=main&label=CI&logo=github&style=flat-square" /></a>
+<a href="https://github.com/Marcelfedz/paperframe/releases"><img alt="Release" src="https://img.shields.io/github/v/release/Marcelfedz/paperframe?style=flat-square&color=2D6BD6" /></a>
+<a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-green?style=flat-square" /></a>
+<img alt="Platform: macOS · Linux" src="https://img.shields.io/badge/platform-macOS%20%C2%B7%20Linux-blue?style=flat-square" />
+<a href="https://claude.com/claude-code"><img alt="Runs in Claude Code" src="https://img.shields.io/badge/runs%20in-Claude%20Code-D97757?style=flat-square" /></a>
+</p>
+
+<p>
+<a href="#quick-start">Quick start</a> ·
+<a href="#how-it-works">How it works</a> ·
+<a href="#requirements-and-cost">Cost</a> ·
+<a href="#commands">Commands</a> ·
+<a href="#rights">Rights</a> ·
+<a href="#contributing">Contributing</a>
+</p>
+
+</div>
+
+---
+
+> **The paper you saved for "this weekend", as a six-minute video with its own pages on screen.**
+
+Paperframe turns a research paper into a narrated, animated video: the real pages on a desk, a highlighter that follows the voice, figures standing up in 3D. Every claim points to its page.
 
 <p align="center">
   <img src="assets/readme/hero.gif" width="720" alt="A line chart on a printed page rises into a row of 3D bars that form a U shape, from 75.8% down to 53.8% and back up to 63.2%.">
