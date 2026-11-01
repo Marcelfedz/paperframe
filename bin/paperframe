@@ -140,7 +140,11 @@ doctor() {
   if [ -x "$VENV_PY" ]; then
     local vv; vv="$("$VENV_PY" -c 'import sys; print("%d.%d.%d" % sys.version_info[:3])' 2>/dev/null || echo '?')"
     if "$VENV_PY" -c "import sys; sys.exit(0 if sys.version_info >= (3, $PY_MIN_MINOR) else 1)" 2>/dev/null; then
-      if "$VENV_PY" -c "import kokoro_onnx, soundfile, numpy" >/dev/null 2>&1; then ok ".venv python $vv with kokoro_onnx, soundfile, numpy"
+      if "$VENV_PY" -c "import kokoro_onnx, soundfile, numpy" >/dev/null 2>&1; then
+        # espeak-ng (Kokoro's phonemizer) keeps its data path in a fixed-size buffer: a long install path fails at synthesis time
+        local plen; plen="$("$VENV_PY" -c 'import espeakng_loader as e; print(len(e.get_data_path()))' 2>/dev/null || echo 0)"
+        if [ "$plen" -lt 150 ]; then ok ".venv python $vv with kokoro_onnx, soundfile, numpy"
+        else miss "install path too long for espeak-ng (its data path is $plen characters; the limit is about 150)" "move Paperframe to a shorter path, e.g. ~/paperframe, and run ./install.sh there"; fi
       else miss ".venv python $vv lacks kokoro_onnx / soundfile / numpy" "${pre}.venv/bin/pip install -r requirements.txt   (with uv: uv pip install -p .venv -r requirements.txt)"; fi
     else miss ".venv python $vv is too old (need ≥ 3.$PY_MIN_MINOR)" "${pre}rm -rf .venv && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt"; fi
   else miss ".venv not found at the repo root" "${pre}python3 -m venv .venv && .venv/bin/pip install -r requirements.txt   (with uv: uv venv .venv && uv pip install -p .venv -r requirements.txt)"; fi
