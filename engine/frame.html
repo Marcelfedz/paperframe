@@ -1,0 +1,86 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>paperframe frame</title>
+<style>
+  html, body { margin: 0; background: #111; }
+  canvas { display: block; width: var(--w, 1920px); height: var(--h, 1080px); }
+  body.play canvas { width: 100vw; height: auto; max-height: calc(100vh - 56px); object-fit: contain; }
+  #bar { display: none; gap: 12px; align-items: center; padding: 10px 16px; font: 13px ui-monospace, monospace; color: #ddd; }
+  body.play #bar { display: flex; }
+  #bar input { flex: 1; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script>
+  // Frame size before any module loads: runtime.js reads globalThis.__W/__H (default 1920×1080).
+  // render.mjs passes ?w=1080&h=1920 for `format: vertical` videos.
+  (() => {
+    const q = new URLSearchParams(location.search);
+    const w = +q.get('w') || 1920, h = +q.get('h') || 1080;
+    globalThis.__W = w; globalThis.__H = h;
+    const c = document.getElementById('c');
+    c.width = w; c.height = h;
+    document.documentElement.style.setProperty('--w', w + 'px');
+    document.documentElement.style.setProperty('--h', h + 'px');
+  })();
+</script>
+<div id="bar"><button id="pp">play</button><input id="scrub" type="range" min="0" step="0.001"><span id="tc">0.00</span></div>
+<script type="module">
+  // Loads one scene against its segment timing. ep = the video folder, relative to the repo root.
+  //   ?ep=examples/react&seg=cover            -> render mode (render.mjs drives window.__draw)
+  //   ?ep=examples/react&seg=cover&play=1     -> live preview with audio + scrubber
+  //   &scene=thumb                            -> load scenes/thumb.js instead of NN-seg.js (same segment timing)
+  const q = new URLSearchParams(location.search);
+  const ep = q.get('ep');
+  const segName = q.get('seg');
+  const R = await import('/engine/runtime.js');
+  const timings = await (await fetch(`/${ep}/audio/timings.json`)).json();
+  const idx = timings.segments.findIndex((s) => s.name === segName);
+  const timing = timings.segments[idx];
+  const sceneFile = q.get('scene') || `${String(idx + 1).padStart(2, '0')}-${segName}`;
+  const mod = await import(`/${ep}/scenes/${sceneFile}.js?v=${Date.now()}`);
+  const scene = mod.default;
+  const env = { timing, dur: timing.duration + timings.tail, ep, R };
+  const ctx = document.getElementById('c').getContext('2d');
+  if (scene.setup) await scene.setup(env);
+  // warm system fonts so the first frame measures correctly
+  for (const f of Object.values(R.FONT)) for (const w of [400, 500, 700, 800, 900]) { ctx.font = `${w} 40px ${f}`; ctx.fillText('Aa', -100, -100); }
+  await document.fonts.ready;
+
+  window.__dur = env.dur;
+  window.__draw = (t) => {
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+    scene.draw(ctx, t, env);
+  };
+  window.__ready = true;
+
+  if (q.get('play')) {
+    document.body.classList.add('play');
+    const audio = new Audio(`/${ep}/audio/${timing.file}`);
+    const scrub = document.getElementById('scrub');
+    const tc = document.getElementById('tc');
+    scrub.max = env.dur;
+    let playing = false, t0 = 0, start = 0, t = 0;
+    const pp = document.getElementById('pp');
+    pp.onclick = () => {
+      playing = !playing;
+      pp.textContent = playing ? 'pause' : 'play';
+      if (playing) { start = performance.now(); t0 = t; audio.currentTime = t; audio.play(); } else audio.pause();
+    };
+    scrub.oninput = () => { t = +scrub.value; if (playing) { t0 = t; start = performance.now(); audio.currentTime = t; } };
+    const loop = () => {
+      if (playing) { t = t0 + (performance.now() - start) / 1000; if (t > env.dur) { t = 0; t0 = 0; start = performance.now(); audio.currentTime = 0; } scrub.value = t; }
+      tc.textContent = t.toFixed(2);
+      window.__draw(t);
+      requestAnimationFrame(loop);
+    };
+    loop();
+  }
+</script>
+</body>
+</html>

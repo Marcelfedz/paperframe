@@ -1,0 +1,130 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 340" width="1000" height="340" role="img" aria-labelledby="t d">
+  <title id="t">How Paperframe works</title>
+  <desc id="d">Five steps: the paper, the script and facts, the voice, the scenes, the video. You run one command; a producer agent writes the script and the audio, scene-author agents write the scenes in parallel, and the coordinator reviews stills and renders.</desc>
+  <defs>
+    <filter id="sh" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2.2"/>
+      <feOffset dx="1.5" dy="3" result="o"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.18"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#1D1F24"/>
+    </marker>
+  </defs>
+  <style>
+    .t  { font: 600 17px -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; fill: #1D1F24; }
+    .s  { font: 400 13px -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; fill: #5C616B; }
+    .r  { font: 400 12.5px -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; fill: #5C616B; }
+    .m  { font: 400 12.5px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fill: #5C616B; }
+    .ink  { stroke: #1D1F24; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+    .txt  { stroke: #9AA0A8; stroke-width: 2.4; stroke-linecap: round; }
+    .page { fill: #FFFFFF; stroke: #C9C3B8; stroke-width: 1; }
+    .br   { stroke: #9AA0A8; stroke-width: 1.2; fill: none; }
+  </style>
+
+  <!-- the card: its own background, so it reads on light and dark themes -->
+  <rect x="1" y="1" width="998" height="338" rx="18" fill="#F3F1EC" stroke="#C9C3B8"/>
+
+  <!-- 1 · paper -->
+  <g filter="url(#sh)"><rect class="page" x="62" y="50" width="96" height="124" rx="2"/></g>
+  <line x1="76" y1="66" x2="132" y2="66" stroke="#1D1F24" stroke-width="3.4" stroke-linecap="round"/>
+  <line class="txt" x1="86" y1="76" x2="122" y2="76" stroke-width="1.8"/>
+  <line class="txt" x1="74" y1="90" x2="146" y2="90"/>
+  <line class="txt" x1="74" y1="100" x2="146" y2="100"/>
+  <rect x="71" y="106" width="64" height="10" rx="1.5" fill="#FFE45E"/>
+  <line x1="74" y1="111" x2="132" y2="111" stroke="#5C616B" stroke-width="2.4" stroke-linecap="round"/>
+  <line class="txt" x1="74" y1="122" x2="146" y2="122"/>
+  <line class="txt" x1="74" y1="132" x2="140" y2="132"/>
+  <line class="txt" x1="74" y1="146" x2="146" y2="146"/>
+  <line class="txt" x1="74" y1="156" x2="146" y2="156"/>
+  <line class="txt" x1="74" y1="166" x2="118" y2="166"/>
+  <text class="t" x="110" y="208" text-anchor="middle">Paper</text>
+  <text class="s" x="110" y="230" text-anchor="middle">arXiv link or PDF</text>
+
+  <!-- 2 · script & facts -->
+  <g filter="url(#sh)"><rect class="page" x="257" y="50" width="96" height="124" rx="2"/></g>
+  <line x1="269" y1="64" x2="321" y2="64" stroke="#1D1F24" stroke-width="2.6" stroke-linecap="round"/>
+  <g class="ink" stroke-width="1.1">
+    <line x1="269" y1="76" x2="341" y2="76"/>
+    <line x1="319" y1="76" x2="319" y2="164"/>
+    <line x1="269" y1="98" x2="341" y2="98"/>
+    <line x1="269" y1="120" x2="341" y2="120"/>
+    <line x1="269" y1="142" x2="341" y2="142"/>
+    <line x1="269" y1="164" x2="341" y2="164"/>
+  </g>
+  <line class="txt" x1="272" y1="87" x2="311" y2="87"/>
+  <line class="txt" x1="272" y1="109" x2="305" y2="109"/>
+  <line class="txt" x1="272" y1="131" x2="313" y2="131"/>
+  <line class="txt" x1="272" y1="153" x2="301" y2="153"/>
+  <g class="ink" stroke-width="1.8">
+    <path d="M324 87 h7"/><path d="M335 84 l2 3 l4 -6"/>
+    <path d="M324 109 h7"/><path d="M335 106 l2 3 l4 -6"/>
+    <path d="M324 131 h7"/><path d="M335 128 l2 3 l4 -6"/>
+    <path d="M324 153 h7"/><path d="M335 150 l2 3 l4 -6"/>
+  </g>
+  <text class="t" x="305" y="208" text-anchor="middle">Script &amp; facts</text>
+  <text class="s" x="305" y="230" text-anchor="middle">every claim sourced</text>
+
+  <!-- 3 · voice -->
+  <g filter="url(#sh)"><rect class="page" x="452" y="50" width="96" height="124" rx="2"/></g>
+  <g class="ink" stroke-width="2.2">
+    <path d="M466 106 v12 M471 100 v24 M476 94 v36 M481 103 v18 M486 108 v8 M491 97 v30 M496 90 v44 M501 101 v22 M506 106 v12 M511 95 v34 M516 99 v26 M521 105 v14 M526 98 v28 M531 104 v16 M536 108 v8"/>
+  </g>
+  <g class="br">
+    <line x1="464" y1="152" x2="538" y2="152"/>
+    <path d="M466 148 v8 M484 148 v8 M497 148 v8 M519 148 v8 M533 148 v8"/>
+  </g>
+  <text class="t" x="500" y="208" text-anchor="middle">Voice</text>
+  <text class="s" x="500" y="230" text-anchor="middle">narration first, word timings</text>
+
+  <!-- 4 · scenes: the page on the desk, a figure standing up -->
+  <g filter="url(#sh)"><rect class="page" x="647" y="50" width="96" height="124" rx="2"/></g>
+  <line class="txt" x1="659" y1="64" x2="731" y2="64"/>
+  <line class="txt" x1="659" y1="74" x2="725" y2="74"/>
+  <line class="txt" x1="659" y1="84" x2="731" y2="84"/>
+  <g class="ink" stroke-width="1.4">
+    <!-- three slabs: front, top, side -->
+    <rect x="661" y="128" width="18" height="30" fill="#F1F1F1"/>
+    <path d="M661 128 l7 -6 h18 l-7 6 z" fill="#FFFFFF"/>
+    <path d="M679 158 l7 -6 v-30 l-7 6 z" fill="#DCDAD5"/>
+    <rect x="687" y="108" width="18" height="50" fill="#F1F1F1"/>
+    <path d="M687 108 l7 -6 h18 l-7 6 z" fill="#FFFFFF"/>
+    <path d="M705 158 l7 -6 v-50 l-7 6 z" fill="#DCDAD5"/>
+    <rect x="713" y="138" width="18" height="20" fill="#F1F1F1"/>
+    <path d="M713 138 l7 -6 h18 l-7 6 z" fill="#FFFFFF"/>
+    <path d="M731 158 l7 -6 v-20 l-7 6 z" fill="#DCDAD5"/>
+  </g>
+  <text class="t" x="695" y="208" text-anchor="middle">Scenes</text>
+  <text class="s" x="695" y="230" text-anchor="middle">pages, highlights, 3D</text>
+
+  <!-- 5 · video -->
+  <g filter="url(#sh)"><rect x="828" y="77" width="124" height="70" rx="3" fill="#FFFFFF" stroke="#1D1F24" stroke-width="1.4"/></g>
+  <rect x="842" y="86" width="34" height="44" fill="#FFFFFF" stroke="#C9C3B8" transform="rotate(-6 859 108)"/>
+  <path d="M884 98 l18 11 l-18 11 z" fill="#1D1F24"/>
+  <line x1="838" y1="139" x2="942" y2="139" stroke="#C9C3B8" stroke-width="2.2" stroke-linecap="round"/>
+  <line x1="838" y1="139" x2="880" y2="139" stroke="#1D1F24" stroke-width="2.2" stroke-linecap="round"/>
+  <text class="t" x="890" y="208" text-anchor="middle">Video</text>
+  <text class="s" x="890" y="230" text-anchor="middle">reviewed, rendered</text>
+
+  <!-- arrows -->
+  <g class="ink" stroke-width="1.6" marker-end="url(#ah)">
+    <line x1="168" y1="112" x2="247" y2="112"/>
+    <line x1="363" y1="112" x2="442" y2="112"/>
+    <line x1="558" y1="112" x2="637" y2="112"/>
+    <line x1="753" y1="112" x2="818" y2="112"/>
+  </g>
+
+  <!-- who does what -->
+  <g class="br">
+    <path d="M52 262 v6 h116 v-6"/>
+    <path d="M257 262 v6 h291 v-6"/>
+    <path d="M637 262 v6 h116 v-6"/>
+    <path d="M818 262 v6 h144 v-6"/>
+  </g>
+  <text class="m" x="110" y="292" text-anchor="middle">/paper-to-video</text>
+  <text class="r" x="402" y="292" text-anchor="middle">producer agent</text>
+  <text class="r" x="695" y="292" text-anchor="middle">scene authors,</text>
+  <text class="r" x="695" y="310" text-anchor="middle">in parallel</text>
+  <text class="r" x="890" y="292" text-anchor="middle">coordinator</text>
+</svg>

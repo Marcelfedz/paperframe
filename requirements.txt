@@ -1,0 +1,5 @@
+# Narration audio (engine/audio.py). Install into .venv at the repo root:
+#   python3 -m venv .venv && .venv/bin/pip install -r requirements.txt   (or: uv venv .venv && uv pip install -p .venv -r requirements.txt)
+kokoro-onnx==0.4.7
+numpy
+soundfile

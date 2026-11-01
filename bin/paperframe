@@ -1,0 +1,259 @@
+#!/usr/bin/env bash
+# paperframe — turn a research paper into a narrated, animated video (folio style).
+# Thin wrapper over engine/: paper_prep.py, audio.py, render.mjs, assemble.mjs.
+# Works from any directory; <video> is a slug (→ papers/<slug>) or a path (examples/react).
+# Bash 3.2 compatible (the macOS system bash).
+
+set -euo pipefail
+
+# ── repo root (symlinks to this script resolve to the real repo) ──
+src="${BASH_SOURCE[0]}"
+while [ -L "$src" ]; do
+  dir="$(cd -P "$(dirname "$src")" && pwd)"
+  src="$(readlink "$src")"
+  case "$src" in /*) ;; *) src="$dir/$src" ;; esac
+done
+ROOT="$(cd -P "$(dirname "$src")/.." && pwd)"
+ENGINE="$ROOT/engine"
+VENV_PY="$ROOT/.venv/bin/python"
+MODELS="$ROOT/models/kokoro"
+MODEL_URL="https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0"
+NODE_MIN=20      # Playwright 1.63 needs Node 20+
+PY_MIN_MINOR=10  # Python 3.10+
+
+if [ -t 1 ]; then B=$'\033[1m'; G=$'\033[32m'; R=$'\033[31m'; Y=$'\033[33m'; D=$'\033[2m'; N=$'\033[0m'; else B= G= R= Y= D= N=; fi
+
+die() { echo "${R}paperframe:${N} $*" >&2; exit 1; }
+
+usage() {
+  cat <<EOF
+${B}paperframe${N} — research paper → narrated, animated video
+
+Usage:
+  paperframe doctor                                 check every dependency, say how to fix what's missing
+  paperframe new <slug> <pdf-url> [--pages 1-N]     create papers/<slug>/ and prepare the paper (pages, word boxes, text);
+                                                    a path instead of a slug prepares that folder (examples/react)
+  paperframe audio <video> [seg …]                  narration.md → audio/*.wav + audio/timings.json (Kokoro by default)
+  paperframe stills <video> <seg> [--stills N | --at t1,t2]
+                                                    review stills → <video>/review/<seg>/contact.png (default --stills 8)
+  paperframe preview <video> <seg>                  live preview with audio and a scrubber, in your browser
+  paperframe render <video> [seg|all] [--workers N] render segments → <video>/render/NN-seg.mp4 (default all)
+  paperframe assemble <video>                       join the segments → <video>/out/<slug>.mp4
+
+<video> is a slug (papers/<slug>) or a path to a video folder (examples/react).
+<pdf-url> can be an arXiv link (https://arxiv.org/abs/<id> or /pdf/<id>), any PDF URL, or a local PDF file.
+
+TTS: Kokoro runs locally (weights in models/kokoro/). ElevenLabs is optional: set ELEVENLABS_API_KEY and
+PAPERFRAME_TTS=elevenlabs (or a 'tts: elevenlabs' line in narration.md's header).
+EOF
+}
+
+# <video> → absolute folder
+video_dir() {
+  local v="${1:-}"
+  [ -n "$v" ] || die "missing <video> (a slug under papers/, or a path such as examples/react)"
+  case "$v" in
+    */* | .*)
+      if [ -d "$v" ]; then (cd "$v" && pwd)
+      elif [ -d "$ROOT/$v" ]; then (cd "$ROOT/$v" && pwd)
+      else die "no video folder at $v"; fi ;;
+    *)
+      [ -d "$ROOT/papers/$v" ] || die "no video papers/$v (create it with: paperframe new $v <pdf-url>)"
+      echo "$ROOT/papers/$v" ;;
+  esac
+}
+
+need_node_engine() {
+  command -v node >/dev/null 2>&1 || die "node is not installed (run: paperframe doctor)"
+  [ -d "$ENGINE/node_modules/playwright" ] || die "engine dependencies missing: cd \"$ENGINE\" && npm install && npx playwright install chromium"
+}
+
+need_venv() {
+  [ -x "$VENV_PY" ] || die "no .venv at the repo root: run ./install.sh, or: python3 -m venv .venv && .venv/bin/pip install -r requirements.txt"
+}
+
+# ── doctor ───────────────────────────────────────────────────────────────────
+doctor() {
+  local fails=0 os pkg
+  os="$(uname -s)"
+  ok()   { printf "  ${G}ok${N}    %s\n" "$1"; }
+  miss() { printf "  ${R}MISS${N}  %s\n        ${D}fix:${N} %s\n" "$1" "$2"; fails=$((fails + 1)); }
+  note() { printf "  ${Y}note${N}  %s\n" "$1"; }
+  pkg() {  # install hint for a system package: pkg <brew-name> <apt-name>
+    if [ "$os" = Darwin ]; then echo "brew install $1"; else echo "sudo apt install $2   (or your distro's package)"; fi
+  }
+
+  local pre=""   # fix commands run from the repo root
+  [ "$(pwd -P)" = "$ROOT" ] || pre="cd \"$ROOT\" && "
+  echo "${B}paperframe doctor${N}  ${D}$ROOT${N}"
+
+  # node
+  if command -v node >/dev/null 2>&1; then
+    local nv nmaj; nv="$(node -v | sed 's/^v//')"; nmaj="${nv%%.*}"
+    if [ "$nmaj" -ge "$NODE_MIN" ] 2>/dev/null; then ok "node $nv (≥ $NODE_MIN)"
+    else miss "node $nv is too old (Playwright needs ≥ $NODE_MIN)" "$(pkg node nodejs), or https://nodejs.org"; fi
+  else miss "node (≥ $NODE_MIN) not found" "$(pkg node nodejs), or https://nodejs.org"; fi
+  command -v npm >/dev/null 2>&1 || miss "npm not found" "it ships with node: $(pkg node npm)"
+
+  # python
+  if command -v python3 >/dev/null 2>&1; then
+    local pv; pv="$(python3 -c 'import sys; print("%d.%d.%d" % sys.version_info[:3])')"
+    if python3 -c "import sys; sys.exit(0 if sys.version_info >= (3, $PY_MIN_MINOR) else 1)"; then ok "python3 $pv (≥ 3.$PY_MIN_MINOR)"
+    else miss "python3 $pv is too old (need ≥ 3.$PY_MIN_MINOR)" "$(pkg python@3.12 python3), or https://www.python.org"; fi
+  else miss "python3 (≥ 3.$PY_MIN_MINOR) not found" "$(pkg python@3.12 python3)"; fi
+
+  # ffmpeg
+  if command -v ffmpeg >/dev/null 2>&1 && command -v ffprobe >/dev/null 2>&1; then
+    ok "ffmpeg $(ffmpeg -version 2>/dev/null | head -1 | awk '{print $3}') + ffprobe"
+  else miss "ffmpeg / ffprobe not found" "$(pkg ffmpeg ffmpeg)"; fi
+
+  # poppler
+  local p missing_p=""
+  for p in pdftoppm pdftotext pdfinfo; do command -v "$p" >/dev/null 2>&1 || missing_p="$missing_p $p"; done
+  if [ -z "$missing_p" ]; then ok "poppler: pdftoppm, pdftotext, pdfinfo"
+  else miss "poppler tools missing:$missing_p" "$(pkg poppler poppler-utils)"; fi
+
+  # engine/node_modules
+  local deps_ok=1 d
+  for d in playwright mathjax; do [ -d "$ENGINE/node_modules/$d" ] || deps_ok=0; done
+  if [ "$deps_ok" = 1 ]; then ok "engine/node_modules (playwright, mathjax)"
+  else miss "engine/node_modules incomplete (playwright, mathjax)" "${pre}cd engine && npm install"; fi
+
+  # Playwright Chromium: launch it for real (the headless shell is what render.mjs uses)
+  if [ "$deps_ok" = 1 ] && command -v node >/dev/null 2>&1; then
+    local out
+    if out="$(cd "$ENGINE" && node --input-type=module -e "
+      import { chromium } from 'playwright';
+      const b = await chromium.launch({ timeout: 30000 }); const v = b.version(); await b.close(); console.log(v);
+    " 2>&1)"; then ok "Playwright Chromium $(echo "$out" | tail -1)"
+    else
+      local fix="${pre}cd engine && npx playwright install chromium"
+      [ "$os" = Linux ] && fix="${pre}cd engine && npx playwright install --with-deps chromium"
+      local why
+      if echo "$out" | grep -q "Executable doesn't exist"; then why="not installed for this Playwright version"
+      else why="does not launch: $(echo "$out" | grep -m1 -E 'rror' | cut -c1-100)"; fi
+      miss "Playwright Chromium $why" "$fix"
+    fi
+  else miss "Playwright Chromium (needs engine/node_modules first)" "${pre}cd engine && npm install && npx playwright install chromium"; fi
+
+  # .venv + kokoro_onnx
+  if [ -x "$VENV_PY" ]; then
+    local vv; vv="$("$VENV_PY" -c 'import sys; print("%d.%d.%d" % sys.version_info[:3])' 2>/dev/null || echo '?')"
+    if "$VENV_PY" -c "import sys; sys.exit(0 if sys.version_info >= (3, $PY_MIN_MINOR) else 1)" 2>/dev/null; then
+      if "$VENV_PY" -c "import kokoro_onnx, soundfile, numpy" >/dev/null 2>&1; then ok ".venv python $vv with kokoro_onnx, soundfile, numpy"
+      else miss ".venv python $vv lacks kokoro_onnx / soundfile / numpy" "${pre}.venv/bin/pip install -r requirements.txt   (with uv: uv pip install -p .venv -r requirements.txt)"; fi
+    else miss ".venv python $vv is too old (need ≥ 3.$PY_MIN_MINOR)" "${pre}rm -rf .venv && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt"; fi
+  else miss ".venv not found at the repo root" "${pre}python3 -m venv .venv && .venv/bin/pip install -r requirements.txt   (with uv: uv venv .venv && uv pip install -p .venv -r requirements.txt)"; fi
+
+  # Kokoro weights (sizes as published in the kokoro-onnx release model-files-v1.0)
+  local f want size
+  for f in kokoro-v1.0.onnx:325532387 voices-v1.0.bin:28214398; do
+    want="${f##*:}"; f="${f%%:*}"
+    if [ -f "$MODELS/$f" ]; then
+      size="$(wc -c < "$MODELS/$f" | tr -d ' ')"
+      if [ "$size" = "$want" ]; then ok "models/kokoro/$f ($((size / 1000000)) MB)"
+      else miss "models/kokoro/$f has $size bytes, expected $want (partial download?)" "${pre}curl -L --fail -o models/kokoro/$f $MODEL_URL/$f"; fi
+    else miss "models/kokoro/$f not found" "${pre}mkdir -p models/kokoro && curl -L --fail -o models/kokoro/$f $MODEL_URL/$f"; fi
+  done
+
+  # optional
+  if [ -n "${ELEVENLABS_API_KEY:-}" ] || grep -qs '^ELEVENLABS_API_KEY=.' "$ROOT/.env"; then note "ElevenLabs key found (optional engine; Kokoro stays the default unless PAPERFRAME_TTS=elevenlabs)"; fi
+
+  echo
+  if [ "$fails" -eq 0 ]; then echo "${G}All set.${N} Next: paperframe new <slug> <pdf-url>, or rebuild the reference video (examples/react/README.md)."; return 0
+  else echo "${R}$fails missing.${N} ./install.sh fixes most of these in one go."; return 1; fi
+}
+
+# ── commands ─────────────────────────────────────────────────────────────────
+cmd_new() {
+  local slug="${1:-}" url="${2:-}"
+  [ -n "$slug" ] && [ -n "$url" ] || die "usage: paperframe new <slug> <pdf-url> [--pages 1-N]"
+  shift 2
+  local dir name
+  case "$slug" in
+    */*)   # a path instead of a slug (e.g. examples/react): prepare the paper in that folder
+      case "$slug" in /*) dir="$slug" ;; *) if [ -d "$slug" ]; then dir="$(cd "$slug" && pwd)"; else dir="$ROOT/$slug"; fi ;; esac ;;
+    *)
+      echo "$slug" | grep -Eq '^[a-z0-9][a-z0-9-]*$' || die "slug must be lowercase letters, digits and dashes (e.g. attention-is-all-you-need)"
+      dir="$ROOT/papers/$slug" ;;
+  esac
+  name="${dir#$ROOT/}"
+  local pages=()
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --pages) [ -n "${2:-}" ] || die "--pages needs a range like 1-12"; echo "$2" | grep -Eq '^[0-9]+-[0-9]+$' || die "--pages takes a range like 1-12"; pages=(--pages "$2"); shift 2 ;;
+      *) die "unknown option $1 (usage: paperframe new <slug> <pdf-url> [--pages 1-N])" ;;
+    esac
+  done
+  for p in pdftoppm pdftotext pdfinfo; do command -v "$p" >/dev/null 2>&1 || die "$p not found: install poppler (paperframe doctor says how)"; done
+  local py=python3
+  [ -x "$VENV_PY" ] && py="$VENV_PY"
+  if [ -d "$dir" ]; then echo "${Y}$name exists${N}: re-preparing the paper (source.pdf is reused if present)"; fi
+  mkdir -p "$dir/prompts" "$dir/scenes"
+  "$py" "$ENGINE/paper_prep.py" "$dir" "$url" ${pages[@]+"${pages[@]}"}
+  cat <<EOF
+
+${G}$name/${N} is ready:
+  paper/       source.pdf, page-NN.png, words.json, text-NN.txt (read these to write the briefing)
+  prompts/ scenes/   for the segment prompts and scene files
+Next: write briefing.md and narration.md (if not there yet), then  paperframe audio $slug
+EOF
+}
+
+cmd_audio() {
+  local dir; dir="$(video_dir "${1:-}")"; shift
+  need_venv
+  [ -f "$dir/narration.md" ] || die "no narration.md in ${dir#$ROOT/}"
+  "$VENV_PY" "$ENGINE/audio.py" "$dir" "$@"
+}
+
+cmd_stills() {
+  local dir seg; dir="$(video_dir "${1:-}")"; seg="${2:-}"
+  [ -n "$seg" ] || die "usage: paperframe stills <video> <seg> [--stills N | --at t1,t2]"
+  shift 2
+  need_node_engine
+  local has=0 a
+  for a in "$@"; do case "$a" in --stills | --at) has=1 ;; esac; done
+  [ "$has" = 1 ] || set -- "$@" --stills 8
+  (cd "$ROOT" && node "$ENGINE/render.mjs" "$dir" "$seg" "$@")
+}
+
+cmd_preview() {
+  local dir seg; dir="$(video_dir "${1:-}")"; seg="${2:-}"
+  [ -n "$seg" ] || die "usage: paperframe preview <video> <seg>"
+  shift 2
+  need_node_engine
+  echo "${D}open the URL below; Ctrl-C to stop${N}"
+  (cd "$ROOT" && node "$ENGINE/render.mjs" "$dir" "$seg" --serve "$@")
+}
+
+cmd_render() {
+  local dir seg; dir="$(video_dir "${1:-}")"; shift
+  seg=all
+  if [ $# -gt 0 ]; then case "$1" in --*) ;; *) seg="$1"; shift ;; esac; fi
+  local a
+  for a in "$@"; do case "$a" in --stills | --at | --serve | --scene) die "render makes video; for stills use: paperframe stills" ;; esac; done
+  need_node_engine
+  command -v ffmpeg >/dev/null 2>&1 || die "ffmpeg not found (paperframe doctor says how to install it)"
+  (cd "$ROOT" && node "$ENGINE/render.mjs" "$dir" "$seg" "$@")
+}
+
+cmd_assemble() {
+  local dir; dir="$(video_dir "${1:-}")"
+  command -v ffmpeg >/dev/null 2>&1 || die "ffmpeg not found (paperframe doctor says how to install it)"
+  (cd "$ROOT" && node "$ENGINE/assemble.mjs" "$dir")
+}
+
+cmd="${1:-}"
+[ $# -gt 0 ] && shift
+case "$cmd" in
+  doctor)   doctor ;;
+  new)      cmd_new "$@" ;;
+  audio)    cmd_audio "$@" ;;
+  stills)   cmd_stills "$@" ;;
+  preview)  cmd_preview "$@" ;;
+  render)   cmd_render "$@" ;;
+  assemble) cmd_assemble "$@" ;;
+  -h | --help | help | "") usage ;;
+  *) echo "${R}unknown command:${N} $cmd" >&2; usage >&2; exit 1 ;;
+esac

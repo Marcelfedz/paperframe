@@ -1,0 +1,15 @@
+{
+  "name": "paperframe-engine",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Paperframe render engine: research paper pages on a desk, animated in canvas and rendered with Playwright + ffmpeg",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "mathjax": "^3.2.2",
+    "playwright": "^1.63.0"
+  }
+}

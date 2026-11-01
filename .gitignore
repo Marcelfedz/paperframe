@@ -1,0 +1,21 @@
+# dependencies and local environments
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+.env
+.DS_Store
+
+# Kokoro weights (install.sh downloads them)
+models/
+
+# your videos stay on your machine
+papers/*
+!papers/.gitkeep
+
+# build output of every video folder (examples included): the paper, audio, stills, renders
+examples/*/paper/
+examples/*/audio/
+examples/*/review/
+examples/*/render/
+examples/*/out/
