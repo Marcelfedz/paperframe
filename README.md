@@ -8,7 +8,7 @@
 
 <p>
 <a href="https://github.com/Marcelfedz/paperframe/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/Marcelfedz/paperframe/ci.yml?branch=main&label=CI&logo=github&style=flat-square" /></a>
-<a href="https://github.com/Marcelfedz/paperframe/releases"><img alt="Release" src="https://img.shields.io/github/v/release/Marcelfedz/paperframe?style=flat-square&color=2D6BD6" /></a>
+<img alt="Last commit" src="https://img.shields.io/github/last-commit/Marcelfedz/paperframe?style=flat-square" />
 <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-green?style=flat-square" /></a>
 <img alt="Platform: macOS · Linux" src="https://img.shields.io/badge/platform-macOS%20%C2%B7%20Linux-blue?style=flat-square" />
 <a href="https://claude.com/claude-code"><img alt="Runs in Claude Code" src="https://img.shields.io/badge/runs%20in-Claude%20Code-D97757?style=flat-square" /></a>
