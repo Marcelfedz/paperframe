@@ -138,8 +138,17 @@ venv_pip() {
   [ -x .venv/bin/python ] || "$PY" -m venv .venv || fail "$PY -m venv .venv failed (on Debian/Ubuntu: sudo apt install python3-venv)"
   .venv/bin/python -m pip install --quiet --disable-pip-version-check -r requirements.txt || fail "pip install -r requirements.txt failed"
 }
+uv_venv() {
+  [ -x .venv/bin/python ] && return 0
+  uv venv --quiet --python "$PY" .venv 2>/dev/null && return 0
+  # A broken system Python (e.g. a Homebrew build whose pyexpat fails) can't seed a venv:
+  # let uv fetch its own interpreter instead.
+  info "uv can't use $PY; using a uv-managed Python 3.12"
+  rm -rf .venv
+  uv venv --quiet --python 3.12 .venv
+}
 if have uv; then
-  if { [ -x .venv/bin/python ] || uv venv --quiet --python "$PY" .venv; } && uv pip install --quiet --python .venv/bin/python -r requirements.txt; then :
+  if uv_venv && uv pip install --quiet --python .venv/bin/python -r requirements.txt; then :
   else
     info "uv did not manage; falling back to python -m venv and pip"
     [ -x .venv/bin/python ] && .venv/bin/python -m pip --version >/dev/null 2>&1 || rm -rf .venv
