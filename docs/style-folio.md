@@ -70,6 +70,12 @@ If you need a helper the kit lacks, keep it inside your scene file and list it i
 
 ## Gotchas
 
+- **Running heads.** Most papers repeat the title or a short title at the top of every page after p. 1, so `findPhrase(page, '<name>')` matches the running head first. Use `nth` or a longer phrase.
+- **Small caps** split words into tokens (`A LLOW`, `B LOCK`); match them as separate words. A phrase that crosses a page break can't be matched in one call: highlight the two halves on their own pages.
+- **Small vector figures** (a panel a few hundred page px wide) can't be pushed in without going soft. Keep the crop as a blueprint and build the close-up on a `blankPage` of our own.
+- **Overrides that end a sentence:** keep the period outside (`{PIN|pin}.`). `{PIN.|pin.} The…` doesn't start a new sentence in `audio.py`, because the character before the space is `}`.
+- **Pronunciation check** before writing overrides: `.venv/bin/python -c "from kokoro_onnx.tokenizer import Tokenizer; print(Tokenizer().phonemize('GPT-5.6-Terra', 'en-us'))"` shows whether Kokoro already says a name right.
+
 **Finding text**
 
 - `findPhrase` normalises words to `[a-z0-9]`. So `Łukasz` matches as `ukasz` on both sides, and footnote marks (`Vaswani∗`) don't break matches. Page words that normalise to nothing ("·", "=", lone footnote marks) are skipped, so table cells and formula lines match.
