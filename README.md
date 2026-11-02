@@ -65,6 +65,9 @@ Leave out `--lite` for the full-length video. The finished video lands in `paper
 
 ## How it works
 
+Every video tells the paper in the order a paper is made: **context** (why this area matters now), **gap** (what was missing), **hypothesis** (what the authors set out to show), **approach** (what they built that is new, animated in 3D), **findings** (two or three headline results) and **limits** (what it means and where it stops). The details that don't serve that story stay out.
+
+
 <p align="center">
   <img src="assets/readme/how-it-works.svg" width="100%" alt="Five steps: the paper, the script and facts, the voice, the scenes, the video. A producer agent writes the script and audio, scene authors write the scenes in parallel, and a coordinator reviews and renders.">
 </p>

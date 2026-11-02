@@ -1,6 +1,6 @@
 ---
 name: paper-to-video
-description: Turn a research paper (arXiv URL, DOI or PDF link) into a narrated folio-style video, with the real pages on a light desk, a highlighter that follows the voice and figures standing up in 3D. Coordinates the paper-producer and scene-author subagents, reviews stills, renders and assembles. Add --lite for a shorter, cheaper video of 4 segments and about 3 minutes.
+description: Turn a research paper (arXiv URL, DOI or PDF link) into a narrated folio-style video, with the real pages on a light desk, a highlighter that follows the voice and figures standing up in 3D. Coordinates the paper-producer and scene-author subagents, reviews stills, renders and assembles. Every video follows the story arc: context, gap, hypothesis, what is new (animated), findings, limits. Add --lite for a shorter, cheaper video of 4 segments and about 3 minutes.
 argument-hint: <arxiv-or-pdf-url> [--lite]
 disable-model-invocation: true
 allowed-tools: Bash(bin/paperframe *)
@@ -40,14 +40,15 @@ If it exits 1, show the user what is missing and the fix it printed, and stop.
 Start one `paper-producer` subagent (Agent tool, `subagent_type: paper-producer`). Give it:
 
 - the slug, the paper URL, the PDF URL and the version;
-- the mode: full (the 7-segment story arc in `docs/playbook.md`: cover · context · gap · hypothesis · approach · findings · limits, 4:30–6:00) or lite (exactly 4 segments, cover · gap · approach · findings, 2:30–3:30);
+- the mode: full (the story arc in `docs/playbook.md`: cover · context · gap · hypothesis · approach (+ approach2 when the method has two separate halves) · findings · limits; usually 5–6 min, longer when the topic needs it) or lite (exactly 4 segments, cover · gap · approach · findings, 2:30–3:30);
 - what you found about the licence, with URLs.
 
 When it reports, check before going on:
 
-- `briefing.md` has a Rights paragraph and a verified facts table;
+- the segment table opens with the seven one-sentence story answers (context, gap, hypothesis, what is new, findings, limits) and they read as a clear story on their own;
+- `briefing.md` has a Rights paragraph and a verified facts table, and, for a dual-use paper (security, attacks), a `MASK` table in `_data.js`;
 - the cover's verbatim line exists on its page (`grep` it in `paper/text-NN.txt`);
-- `audio/timings.json` exists, and the total duration is within 30 s of the target;
+- `audio/timings.json` exists, and the total duration fits the story (usually 5–6 min; longer is fine when the topic needs it, padding is not);
 - there is one prompt for every segment.
 
 Send it back with specific fixes if any check fails.
