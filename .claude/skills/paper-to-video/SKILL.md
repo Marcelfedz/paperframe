@@ -40,7 +40,7 @@ If it exits 1, show the user what is missing and the fix it printed, and stop.
 Start one `paper-producer` subagent (Agent tool, `subagent_type: paper-producer`). Give it:
 
 - the slug, the paper URL, the PDF URL and the version;
-- the mode: full (6–8 segments, 4:30–6:00) or lite (exactly 4 segments, cover · idea · evidence · after, 2:30–3:30);
+- the mode: full (the 7-segment story arc in `docs/playbook.md`: cover · context · gap · hypothesis · approach · findings · limits, 4:30–6:00) or lite (exactly 4 segments, cover · gap · approach · findings, 2:30–3:30);
 - what you found about the licence, with URLs.
 
 When it reports, check before going on:

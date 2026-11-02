@@ -35,17 +35,20 @@ Same structure as `examples/react/briefing.md`:
   - names and terms as the page spells them, and the paper's own typos (don't repeat them on screen);
   - sensitive figure content (harmful example outputs) and how scenes keep it unreadable.
 - **Colour key.** What each colour means in this video: the paper's own figure colours and what they stand for, the marker colours, and what marks a loss or a struck phrase. It goes here or in `_data.js` next to `PAL`, never only in one prompt: every author needs it, not only the one writing the cover.
-- **Segment table.** Segment, target duration, pages on the desk, centrepiece.
-  - Full mode: 6–8 segments, 4:30–6:00 in total. Cover · problem · idea · 1–3 detail segments · evidence · after. Add a "machine" segment when there is an architecture figure worth standing up in 3D. When the paper has no architecture figure but the video needs a machine segment, it stands up our own schematic, labelled as ours (`\text{schematic, ours}`).
-  - Lite mode: 4 segments, 2:30–3:30 in total. Cover · idea · evidence · after.
-  - Plan one visual centrepiece per segment: what lifts off, what stands up in 3D, what gets drawn on a blank sheet.
+- **Segment table.** Follow The story arc in `docs/playbook.md`: `cover` · `context` · `gap` · `hypothesis` · `approach` (+ `approach2` only if the method has two distinct halves) · `findings` · `limits`. For each segment: target duration, pages on the desk, the visual centrepiece, and **the one-sentence answer** to that segment's question (what context, which gap, which hypothesis, what is new, which two or three results, which limits). Write those seven sentences first: if they don't read as a clear story on their own, the video won't either.
+  - Full mode: 7–8 segments, 4:30–6:00 in total.
+  - Lite mode: 4 segments, 2:30–3:30: `cover` (with context) · `gap` (with hypothesis) · `approach` · `findings` (with limits).
+  - The centrepiece is `approach`: plan its 3D or diagram build around what is *different* from earlier work. Every other segment gets one simple visual, not a showcase.
+  - Cut ruthlessly. A detail stays only if it changes the viewer's understanding of why the paper exists, what is new, what it found, or where it stops.
 - **Author pairs** (full mode). A table under the segment table: prompt file, its two segments, and what they share (pages, `_data.js` blocks). Pair segments that share pages or data. See the end of `examples/chain-of-thought/briefing.md`.
 
 ### 3. `narration.md`
 
 Follow the playbook, step 3. Write spoken English for a smart non-specialist: a busy researcher or engineer. Be concrete and use short sentences. Spell numbers out, and add `{Display|spoken}` overrides for names and acronyms.
 
-The cover follows the reference: the page and its date, who wrote it, one line from the abstract or introduction read verbatim (it gets highlighted on the page with the voice), why it mattered, and the promise. "Why it mattered" needs a source like any other claim. When you have no sourced impact (adoption, follow-up work, an award), the cover says what the paper did and nothing about how it was received. Quote the paper verbatim only where the line exists on a page that is on screen. Put `(pause N)` after a beat that needs room: the end of the cover, a big 3D reveal. The header lines before the first `##` follow the reference.
+The cover: the page and its date, who wrote it, one line from the abstract read verbatim (highlighted on the page with the voice), and the question the paper answers, in plain words. Then the story follows the arc in order, and every segment opens by saying, in one plain sentence, which question it answers ("So what was missing?", "What did they build?"). Impact claims ("it changed the field") need a source like any other claim; without one, leave them out. Quote the paper verbatim only where the line exists on a page that is on screen. Put `(pause N)` after a beat that needs room: the end of the cover, the `approach` reveal. The header lines before the first `##` follow the reference.
+
+Context and gap carry the "why": take them from the paper's introduction and its own statement of the problem, not from your memory of the field. Limits come from the paper's limitations or discussion section; say them plainly, and add what the result does *not* claim when the paper is careful about it.
 
 The last segment ends on the citation, read as the end card appears: title, first author "and colleagues", venue and year. End it with a `(pause 2)` paragraph, so the end card's licence line stays up long enough to read.
 

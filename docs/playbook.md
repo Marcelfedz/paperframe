@@ -9,7 +9,7 @@ Companion docs:
 - `docs/style-folio.md` is the visual language: devices, palette, motion and the kit's gotchas.
 - `docs/producer.md` is the brief for the agent that writes the script (steps 2–5).
 - `docs/scene-author.md` is the brief for the agents that write scenes (step 6).
-- `examples/` holds three complete reference videos, all CC BY 4.0: ReAct (Yao et al., ICLR 2023), LLaMA (Touvron et al., 2023) and Chain-of-Thought Prompting (Wei et al., NeurIPS 2022). Their `briefing.md`, `narration.md`, `prompts/` and `scenes/` set the bar. ReAct is the one the briefs quote most. LLaMA and Chain-of-Thought show the current full-mode shape (paired prompt files and an author-pair table) and keep the `PAGES` switch in every scene, with `standIn` redraws. When in doubt, match their rigour, tone and shape.
+- `examples/` holds three complete reference videos (made before the story arc; their segment names follow the older structure, their rigour and craft still set the bar), all CC BY 4.0: ReAct (Yao et al., ICLR 2023), LLaMA (Touvron et al., 2023) and Chain-of-Thought Prompting (Wei et al., NeurIPS 2022). Their `briefing.md`, `narration.md`, `prompts/` and `scenes/` set the bar. ReAct is the one the briefs quote most. LLaMA and Chain-of-Thought show the current full-mode shape (paired prompt files and an author-pair table) and keep the `PAGES` switch in every scene, with `standIn` redraws. When in doubt, match their rigour, tone and shape.
 
 Everything runs from the repo root through `bin/paperframe`. Wherever a command takes `<video>`, it means a slug (`react` → `papers/react/`) or a path (`examples/react`).
 
@@ -23,17 +23,38 @@ Everything runs from the repo root through `bin/paperframe`. Wherever a command 
 
 One agent can play every role in sequence. Parallel scene authors only make it faster. Scene authors never edit `engine/`, `briefing.md`, `narration.md` or another author's segment. Nobody edits a scene while its author is still working on it.
 
+## The story arc (every video)
+
+A paper is written in a fixed order: someone sees a context, finds a gap in it, poses a hypothesis, builds something to test it, and reports what held and what didn't. The video tells the paper in that same order, so the viewer always knows *why* before *what*. This arc replaced the earlier cover · problem · idea · details · evidence · after structure on 2026-11-02, after the first 19 videos spent too long on details that six minutes can't make relevant.
+
+| # | Segment | The question it answers | Time (full) | What goes on screen |
+|---|---|---|---|---|
+| 1 | `cover` | What is this paper, and why should I care in one sentence? | 0:25–0:40 | Page 1, the date, the authors; one line read verbatim; the question the paper answers, in plain words. |
+| 2 | `context` | What was the world like? Why does this area matter now? | 0:40–0:60 | Our own sheets and diagrams of the setting; the paper's introduction lines that set it up. Sourced: the paper's own framing, or a URL. |
+| 3 | `gap` | What was missing, broken or unknown, and why did that matter? | 0:40–0:50 | The paper's own statement of the gap, highlighted; what earlier work did and where it stopped (no long related-work tour: one or two contrasts). |
+| 4 | `hypothesis` | What did the authors set out to show, or what question did they ask? | 0:25–0:40 | The hypothesis or research question stated plainly, ideally a line from the paper. |
+| 5 | `approach` | What did they build or do that is *different* from what existed? | 1:00–1:40 | The animated centrepiece: the method, the system or the study design, standing up in 3D. Only the parts that make it new. One segment, or two (`approach`, `approach2`) when the method has two genuinely distinct halves. |
+| 6 | `findings` | What did they find? | 0:50–1:10 | Two or three headline results, each one number on screen with its context. Not every table. |
+| 7 | `limits` | What does it mean, what doesn't it show, and what's next? | 0:50–1:10 | The authors' conclusions, their stated limitations, what the result does *not* claim; then the end card. |
+
+Rules of the arc:
+- **Why before what.** A viewer who stops after `hypothesis` should already understand why the paper exists.
+- **Differential, not exhaustive.** `approach` animates what is new compared with what existed, not every component. If a detail doesn't change the viewer's understanding of the contribution, it stays out, however good it would look.
+- **Few numbers.** At most one number per beat, three or four headline numbers in the whole video.
+- **Plain language.** Explain jargon the first time it is used, or avoid it.
+- **Limits are part of the story**, not an afterthought. Read them from the paper ("Limitations", "Threats to validity", "Discussion") and say them plainly.
+
 ## Modes
 
 | | Full | Lite |
 |---|---|---|
 | Length | 4:30–6:00 | 2:30–3:30 |
-| Segments | 6–8: cover · problem · idea · 1–3 detail segments · evidence · after, plus a "machine" segment when the paper has an architecture figure worth standing up in 3D | 4: cover · idea · evidence · after |
+| Segments | the 7 of the arc (8 with `approach2`) | 4: `cover` (with context) · `gap` (with hypothesis) · `approach` · `findings` (with limits) |
 | Scene authors | up to 4, two segments each | 1, all four segments |
 | Agents | producer + up to 4 authors | producer + 1 author |
 | Cost | about 2.3M tokens across five agents, measured on one full video | not measured yet; fewer agents and half the segments |
 
-Lite keeps every rigour rule. It is shorter, not looser.
+Lite keeps every rigour rule and the same order. It is shorter, not looser.
 
 ## The video folder
 
@@ -123,7 +144,7 @@ The briefing is written from the paper itself (`paper/text-NN.txt` and the page 
 - **Verified facts table**: every claim the video makes, mapped to a page, section, table, figure or equation of the paper. Anything from outside the paper gets a URL.
 - **Guardrails**: what must not be said or must be said carefully. Inconsistencies inside the paper (use the table, note the other), claims the authors only "suspect", best-vs-best comparisons, what is illustrative, names spelled the way the page spells them.
 - **Colour key**: what each colour means in this video. It lives in the briefing or `_data.js`, never only in one prompt.
-- **Segment table**: segment, target duration, pages on the desk, visual centrepiece. In full mode, followed by the author pairs: which two segments each prompt file holds, and what they share.
+- **Segment table**: the arc's segments (see The story arc), target duration, pages on the desk, visual centrepiece, and the one-sentence answer each segment gives to its question. In full mode, followed by the author pairs: which two segments each prompt file holds, and what they share.
 
 ## 3. Narration (producer)
 
@@ -140,7 +161,7 @@ This is page one of a paper that went up on {arXiv|archive} on October sixth, tw
 
 (pause 2)
 
-## problem
+## context
 ...
 ```
 
@@ -150,7 +171,7 @@ This is page one of a paper that went up on {arXiv|archive} on October sixth, tw
 - A paragraph that is only `(pause N)` inserts N seconds of silence. Use it after the cover, after big 3D reveals, and at the end of the last segment: `(pause 2)` keeps the end card's licence line up long enough to read.
 - Short sentences. Each sentence becomes an exact timing anchor, and a beat needs a word to land on. A new sentence starts only where `.`, `!`, `?` or `…` is followed by a capital letter, a quote or `{`. A sentence that opens with a lowercase word ("arXiv") or a digit stays joined to the one before, and loses its anchor.
 - About 155 words per minute after the default tempo. Budget the segment table with it.
-- The cover follows the reference: the page and its date, who wrote it, one line from the abstract or introduction read verbatim (the highlighter runs over it on the page), why it mattered, and the promise of what the viewer will be able to do by the end. "Why it mattered" needs a source. Without one, the cover says what the paper did and nothing about how it was received.
+- The cover: the page and its date, who wrote it, one line from the abstract read verbatim (the highlighter runs over it on the page), and the question the paper answers, in plain words. No impact claims without a source. The rest of the story (context, gap, hypothesis, approach, findings, limits) follows The story arc.
 - Quote the paper verbatim only where the line exists on a page that is on screen. Everything else is paraphrase.
 - No hype: no "groundbreaking", "revolutionary", "game-changing", "unlock", "leverage", "seamless", "delve". The video explains; it does not sell.
 
