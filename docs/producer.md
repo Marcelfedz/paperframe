@@ -36,7 +36,7 @@ Same structure as `examples/react/briefing.md`:
   - sensitive figure content (harmful example outputs) and how scenes keep it unreadable.
 - **Colour key.** What each colour means in this video: the paper's own figure colours and what they stand for, the marker colours, and what marks a loss or a struck phrase. It goes here or in `_data.js` next to `PAL`, never only in one prompt: every author needs it, not only the one writing the cover.
 - **Segment table.** Follow The story arc in `docs/playbook.md`: `cover` · `context` · `gap` · `hypothesis` · `approach` (+ `approach2` only if the method has two distinct halves) · `findings` · `limits`. For each segment: target duration, pages on the desk, the visual centrepiece, and **the one-sentence answer** to that segment's question (what context, which gap, which hypothesis, what is new, which two or three results, which limits). Write those seven sentences first: if they don't read as a clear story on their own, the video won't either.
-  - Full mode: 7–8 segments, 4:30–6:00 in total.
+  - Full mode: 7–8 segments, usually 5–6 minutes. Longer is fine when the topic needs it; don't cut the why or the approach to hit a number.
   - Lite mode: 4 segments, 2:30–3:30: `cover` (with context) · `gap` (with hypothesis) · `approach` · `findings` (with limits).
   - The centrepiece is `approach`: plan its 3D or diagram build around what is *different* from earlier work. Every other segment gets one simple visual, not a showcase.
   - Cut ruthlessly. A detail stays only if it changes the viewer's understanding of why the paper exists, what is new, what it found, or where it stops.

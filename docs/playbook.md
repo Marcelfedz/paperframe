@@ -45,14 +45,14 @@ Rules of the arc:
 - **Limits are part of the story**, not an afterthought. Read them from the paper ("Limitations", "Threats to validity", "Discussion") and say them plainly.
 - **Research questions count as the hypothesis.** Measurement and empirical studies often pose research questions instead of a hypothesis: state those (two or three at most) in `hypothesis`, and let `findings` answer them in the same order.
 - **What counts as a number.** The budget of three or four headline numbers is for narrated numbers. Numbers printed in a figure, or labelling a diagram without being spoken, don't count, but keep them few.
-- **Fit the time.** The ranges in the table are guides; their top ends add up to more than 6:00, so a long `approach` means shorter `context` and `hypothesis`.
+- **Fit the time.** The ranges in the table are guides. Length follows the topic: a paper that needs more context or a longer `approach` gets it, and the video runs past 6:00. What never stretches is detail that doesn't serve the story.
 - **Dual-use papers** (security, attacks, jailbreaks): the video explains the threat to defenders and is never a recipe. No readable malicious code, payloads, prompt-injection text, URLs, domains, IPs or other indicators of compromise; mask them on the page (`masked()`), keep them below reading size, or don't show that page. Describe techniques at the level of the paper's taxonomy. End on the constructive part the paper supports (disclosure, fixes, released defences).
 
 ## Modes
 
 | | Full | Lite |
 |---|---|---|
-| Length | 4:30–6:00 | 2:30–3:30 |
+| Length | about 5–6 min, longer when the topic needs it (Marcel, 2026-11-02: clarity beats a fixed length) | 2:30–3:30 |
 | Segments | the 7 of the arc (8 with `approach2`) | 4: `cover` (with context) · `gap` (with hypothesis) · `approach` · `findings` (with limits) |
 | Scene authors | up to 4, two segments each | 1, all four segments |
 | Agents | producer + up to 4 authors | producer + 1 author |
